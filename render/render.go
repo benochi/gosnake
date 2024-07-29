@@ -2,7 +2,8 @@ package render
 
 import (
 	"fmt"
-	"snake-game/game"
+	"gosnake/constants"
+	"gosnake/game"
 	"time"
 
 	"github.com/faiface/pixel"
@@ -11,17 +12,11 @@ import (
 	"golang.org/x/image/colornames"
 )
 
-const (
-	winWidth  = 800
-	winHeight = 600
-	cellSize  = 20
-)
-
 func Run(g *game.Game) {
 	fmt.Println("Initializing window...")
 	cfg := pixelgl.WindowConfig{
 		Title:  "Snake Game",
-		Bounds: pixel.R(0, 0, winWidth, winHeight),
+		Bounds: pixel.R(0, 0, constants.WinWidth, constants.WinHeight),
 		VSync:  true,
 	}
 	win, err := pixelgl.NewWindow(cfg)
@@ -30,39 +25,40 @@ func Run(g *game.Game) {
 	}
 
 	fmt.Println("Entering game loop...")
-	last := time.Now()
+	ticker := time.NewTicker(200 * time.Millisecond)
+	defer ticker.Stop()
+
 	for !win.Closed() {
-		dt := time.Since(last).Seconds()
-		last = time.Now()
-
-		if g.Running {
-			g.Update()
+		select {
+		case <-ticker.C:
+			if g.Running {
+				fmt.Println("Updating game...")
+				g.Update()
+			}
+		default:
+			handleInput(win, g)
+			win.Clear(colornames.Black)
+			drawGame(win, g)
+			win.Update()
 		}
-
-		win.Clear(colornames.Black)
-		drawGame(win, g)
-		win.Update()
 
 		if win.Pressed(pixelgl.KeyQ) {
 			win.SetClosed(true)
 		}
-
-		handleInput(win, g)
-		time.Sleep(time.Duration(dt*1000) * time.Millisecond)
 	}
 }
 
 func handleInput(win *pixelgl.Window, g *game.Game) {
-	if win.Pressed(pixelgl.KeyW) {
-		g.HandleInput(game.Point{0, -1})
+	if win.JustPressed(pixelgl.KeyW) {
+		g.HandleInput(game.Point{0, 1}) // Fix: W moves up
 	}
-	if win.Pressed(pixelgl.KeyA) {
+	if win.JustPressed(pixelgl.KeyA) {
 		g.HandleInput(game.Point{-1, 0})
 	}
-	if win.Pressed(pixelgl.KeyS) {
-		g.HandleInput(game.Point{0, 1})
+	if win.JustPressed(pixelgl.KeyS) {
+		g.HandleInput(game.Point{0, -1}) // Fix: S moves down
 	}
-	if win.Pressed(pixelgl.KeyD) {
+	if win.JustPressed(pixelgl.KeyD) {
 		g.HandleInput(game.Point{1, 0})
 	}
 }
@@ -72,14 +68,14 @@ func drawGame(win *pixelgl.Window, g *game.Game) {
 
 	imd.Color = colornames.Green
 	for _, p := range g.Snake.Body {
-		imd.Push(pixel.V(float64(p.X*cellSize), float64(p.Y*cellSize)))
-		imd.Push(pixel.V(float64(p.X*cellSize+cellSize), float64(p.Y*cellSize+cellSize)))
+		imd.Push(pixel.V(float64(p.X*constants.CellSize), float64(p.Y*constants.CellSize)))
+		imd.Push(pixel.V(float64(p.X*constants.CellSize+constants.CellSize), float64(p.Y*constants.CellSize+constants.CellSize)))
 		imd.Rectangle(0)
 	}
 
 	imd.Color = colornames.Red
-	imd.Push(pixel.V(float64(g.Food.X*cellSize), float64(g.Food.Y*cellSize)))
-	imd.Push(pixel.V(float64(g.Food.X*cellSize+cellSize), float64(g.Food.Y*cellSize+cellSize)))
+	imd.Push(pixel.V(float64(g.Food.X*constants.CellSize), float64(g.Food.Y*constants.CellSize)))
+	imd.Push(pixel.V(float64(g.Food.X*constants.CellSize+constants.CellSize), float64(g.Food.Y*constants.CellSize+constants.CellSize)))
 	imd.Rectangle(0)
 
 	imd.Draw(win)

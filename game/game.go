@@ -2,13 +2,9 @@ package game
 
 import (
 	"fmt"
+	"gosnake/constants"
 	"math/rand"
 	"time"
-)
-
-const (
-	width  = 20
-	height = 10
 )
 
 type Game struct {
@@ -21,7 +17,7 @@ type Game struct {
 func NewGame() *Game {
 	rand.Seed(time.Now().UnixNano())
 	snake := Snake{
-		Body:  []Point{{width / 2, height / 2}},
+		Body:  []Point{{constants.Width / 2, constants.Height / 2}},
 		Dir:   Point{0, 1},
 		Alive: true,
 	}
@@ -30,30 +26,43 @@ func NewGame() *Game {
 		Food:    generateFood(),
 		Running: true,
 	}
+	fmt.Println("Game initialized:", game)
 	return game
 }
 
 func generateFood() Point {
-	return Point{rand.Intn(width), rand.Intn(height)}
+	return Point{rand.Intn(constants.Width), rand.Intn(constants.Height)}
 }
 
 func (g *Game) Update() {
+	fmt.Println("Game Update Started")
 	if !g.Snake.Alive {
 		g.Running = false
+		fmt.Println("Snake is not alive. Stopping game.")
 		return
 	}
 
+	// Save the current length of the snake
+	initialLength := len(g.Snake.Body)
+
+	// Move the snake
 	g.Snake.Move()
 
+	// Check if food is eaten
 	if g.Snake.Body[0] == g.Food {
-		g.Snake.Body = append([]Point{g.Food}, g.Snake.Body...)
 		g.Food = generateFood()
 		g.Score++
-	} else if len(g.Snake.Body) > 1 {
-		g.Snake.Body = g.Snake.Body[:len(g.Snake.Body)-1]
+		fmt.Println("Food eaten. New food generated.")
+	} else {
+		// Remove the tail if food is not eaten
+		if len(g.Snake.Body) > initialLength {
+			g.Snake.Body = g.Snake.Body[:initialLength]
+		}
 	}
 
+	fmt.Printf("Snake position: %+v\n", g.Snake.Body)
 	g.Snake.CheckCollision()
+	fmt.Println("Game Update Ended")
 }
 
 func (g *Game) HandleInput(dir Point) {

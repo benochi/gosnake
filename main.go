@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"snake-game/game"
-	"snake-game/render"
+	"gosnake/game"
+	"gosnake/render"
 
 	"github.com/faiface/pixel/pixelgl"
 )
