@@ -37,7 +37,7 @@ func generateFood() Point {
 func (g *Game) Update() {
 	if !g.Snake.Alive {
 		g.Running = false
-		fmt.Println("Snake is not alive. Stopping game.")
+		g.EndGame()
 		return
 	}
 
