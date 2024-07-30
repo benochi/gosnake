@@ -32,7 +32,6 @@ func Run(g *game.Game) {
 		select {
 		case <-ticker.C:
 			if g.Running {
-				fmt.Println("Updating game...")
 				g.Update()
 			}
 		default:

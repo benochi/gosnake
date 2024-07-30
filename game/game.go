@@ -35,7 +35,6 @@ func generateFood() Point {
 }
 
 func (g *Game) Update() {
-	fmt.Println("Game Update Started")
 	if !g.Snake.Alive {
 		g.Running = false
 		fmt.Println("Snake is not alive. Stopping game.")
@@ -59,10 +58,7 @@ func (g *Game) Update() {
 			g.Snake.Body = g.Snake.Body[:initialLength]
 		}
 	}
-
-	fmt.Printf("Snake position: %+v\n", g.Snake.Body)
 	g.Snake.CheckCollision()
-	fmt.Println("Game Update Ended")
 }
 
 func (g *Game) HandleInput(dir Point) {
